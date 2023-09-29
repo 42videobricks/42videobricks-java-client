@@ -1,0 +1,1991 @@
+openapi: 3.0.2
+info:
+  description: 42videobricks is a Video Platform As A Service (VPaaS)
+  title: 42videobricks
+  version: "1.1"
+servers:
+- description: Sandbox server (videos are watermarked and deleted after 24h)
+  url: https://api-sbx.42videobricks.com
+- description: Staging server
+  url: https://api-stg.42videobricks.com
+- description: Production server
+  url: https://api.42videobricks.com
+security:
+- api_key: []
+tags:
+- description: Video Management
+  name: Videos
+- description: Get data and kpis
+  name: Data
+- description: Configure Notifications
+  name: Webhooks
+paths:
+  /videos:
+    get:
+      description: "Return the list of videos.\n\nOptionnal: Title is used to filter\
+        \ video: only video containing \nthis string ware returned.\n\nReturn an empty\
+        \ list it there is no video to return."
+      operationId: getVideos
+      parameters:
+      - description: Number of elements to return (default=10)
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      - description: offset for pagination
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Keywords search in all indexed fields
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: "{{search}}"
+          type: string
+        style: form
+      - description: Sorting results
+        example: "title:desc,ctime:asc"
+        explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoList'
+          description: List of Videos
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: List videos
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/videos"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    post:
+      description: |-
+        You can create a video object by using this endpoint.
+
+        Once the video is created you can then upload the video.
+      operationId: addVideo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VideoProperties'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Video'
+          description: Video Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Add a new video
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: "https://${stageVariables.baseUrl}/videos"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: application/json
+      x-accepts: application/json
+  /videos/{videoId}:
+    delete:
+      operationId: deleteVideoById
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Video Deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Delete a video
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: DELETE
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+          integration.request.path.videoId: method.request.path.videoId
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    get:
+      operationId: getVideoById
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      - description: add a token to assets to alloaw access to private video
+        explode: true
+        in: query
+        name: token
+        required: false
+        schema:
+          example: true
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Video'
+          description: Requested Video
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Retun a single video
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    put:
+      description: |-
+        Update video properties
+
+        Only properties provided are updated.
+      operationId: updateVideoById
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VideoProperties'
+        required: true
+      responses:
+        "202":
+          description: Video update accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Update an existing video
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: PATCH
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: application/json
+      x-accepts: application/json
+  /videos/{videoId}/upload/init:
+    get:
+      description: |-
+        Get a single signed url to upload a file
+        Once the video is uploaded, do not forget to call the single upload finalize
+
+        File formats currently supported: avi, mov, mp4, mpeg, mpg, mxf, ts.
+        New video file is replacing previous video file.
+      operationId: initUploadVideoById
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoUploadInitResponse'
+          description: Signed url to post the video file to upload
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Single file upload intialization
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/upload/init"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+  /videos/{videoId}/upload/finalize:
+    put:
+      description: |-
+        Once video file is uploaded, finalize the upload by requesting to transcode the file.
+        Finalize apply to the last signedurl provided by the upload initialization.
+
+        New video file is replacing previous video file.
+      operationId: finalizeUploadVideoById
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      responses:
+        "202":
+          description: Upload Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Single file upload finalization
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: PUT
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/upload/finalize"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+  /videos/{videoId}/multipart-upload/init:
+    post:
+      description: |-
+        Get signed urls to upload a big file split in multiparts
+        Once the video is uploaded, do not forget to call the multipart upload finalize
+
+        New video file is replacing previous video file.
+      operationId: initMultipartUploadVideoById
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VideoMultipartUploadInit'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoMultipartUploadInitResponse'
+          description: List of signed urls to post parts of the video to upload
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Multipart upload intialization
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/multipart-upload/init"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: application/json
+      x-accepts: application/json
+  /videos/{videoId}/multipart-upload/finalize:
+    post:
+      description: |-
+        Once video parts are uploaded, finalize the upload by requesting to transcode the file.
+
+        New video file is replacing previous video file.
+      operationId: finalizeMultipartUploadVideoById
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VideoMultipartUploadFinalize'
+      responses:
+        "202":
+          description: Upload Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Multipart upload finalization
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/multipart-upload/finalize"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: application/json
+      x-accepts: application/json
+  /videos/{videoId}/thumbnail:
+    delete:
+      operationId: deleteThumbnailByVideoId
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Thumbnail deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Delete a thumbnail
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: DELETE
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/thumbnail"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    post:
+      description: Upload an image file and set it as Thumbnail to the video
+      operationId: addThumbnailByVideoId
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/File'
+        description: "Image file to set as thumbnail (format:jpeg, max size:9Mb)"
+        required: true
+      responses:
+        "200":
+          description: Image file accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Upload a thumbnail
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/thumbnail"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: multipart/form-data
+      x-accepts: application/json
+  /videos/{videoId}/attachments:
+    get:
+      description: Return a list of attachments to a videos
+      operationId: getAttachmentsByVideoId
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      - description: The type of attachments
+        explode: true
+        in: query
+        name: attachmentType
+        required: false
+        schema:
+          enum:
+          - caption
+          - subtitle
+          type: string
+        style: form
+      - description: The locale
+        explode: true
+        in: query
+        name: locale
+        required: false
+        schema:
+          pattern: "^[a-z]{2}-[A-Z]{2}$"
+          type: string
+        style: form
+      - description: Number of elements to return (default=10)
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      - description: offset for pagination
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoAttachmentList'
+          description: List of attachments
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: List of attachments
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/attachments"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+  /videos/{videoId}/attachments/{attachmentType}/{locale}:
+    delete:
+      description: Delete an attachment (and the attached file)
+      operationId: deleteAttachmentByVideoId
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      - description: Type of attachment
+        explode: false
+        in: path
+        name: attachmentType
+        required: true
+        schema:
+          enum:
+          - caption
+          - subtitle
+          example: "{{attachmentType}}"
+          type: string
+        style: simple
+      - description: Le locale value of the attachment
+        explode: false
+        in: path
+        name: locale
+        required: true
+        schema:
+          example: "{{locale}}"
+          pattern: "^[a-z]{2}-[A-Z]{2}$"
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: empty content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Delete an attachment
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: DELETE
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/attachments/{attachmentType}/{locale}"
+        responses:
+          default:
+            statusCode: "204"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.path.attachmentType: method.request.path.attachmentType
+          integration.request.path.locale: method.request.path.locale
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    get:
+      description: Get a video attachement object
+      operationId: getAttachmentByVideoId
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      - description: Type of attachment
+        explode: false
+        in: path
+        name: attachmentType
+        required: true
+        schema:
+          enum:
+          - caption
+          - subtitle
+          example: "{{attachmentType}}"
+          type: string
+        style: simple
+      - description: Le locale value of the attachment
+        explode: false
+        in: path
+        name: locale
+        required: true
+        schema:
+          example: "{{locale}}"
+          pattern: "^[a-z]{2}-[A-Z]{2}$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: video attachement object
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Get the attachment
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/attachments/{attachmentType}/{locale}"
+        responses:
+          default:
+            statusCode: "200"
+            description: the list of attachments
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/VideoAttachment'
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.path.attachmentType: method.request.path.attachmentType
+          integration.request.path.locale: method.request.path.locale
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    post:
+      description: |-
+        Upload an attachement file and attached it to a video
+        Currently:
+        - attachement file type is limited to "subtitle" and "cpation" (close caption)
+        - supported file types: SRT (text/plain), SCC (text/plain),
+        TTML (application/ttml), VTT (text/vtt)
+      operationId: addAttachmentByVideoId
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      - description: Type of attachment
+        explode: false
+        in: path
+        name: attachmentType
+        required: true
+        schema:
+          enum:
+          - caption
+          - subtitle
+          example: "{{attachmentType}}"
+          type: string
+        style: simple
+      - description: Le locale value of the attachment
+        explode: false
+        in: path
+        name: locale
+        required: true
+        schema:
+          example: "{{locale}}"
+          pattern: "^[a-z]{2}-[A-Z]{2}$"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/File'
+        description: "Attachement file to upload: SRT (text/plain), SCC (text/plain),TTML\
+          \ (application/ttml), VTT (text/vtt)"
+        required: true
+      responses:
+        "202":
+          description: File Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Upload an attachement
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/attachments/{attachmentType}/{locale}"
+        responses:
+          default:
+            statusCode: "202"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.path.attachmentType: method.request.path.attachmentType
+          integration.request.path.locale: method.request.path.locale
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: multipart/form-data
+      x-accepts: application/json
+  /videos/{videoId}/attachments/{attachmentType}/{locale}/file:
+    get:
+      description: |-
+        Get the attachement file
+        Currently only text/plain files are handled.
+      operationId: getAttachmentFileByVideoId
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      - description: Type of attachment
+        explode: false
+        in: path
+        name: attachmentType
+        required: true
+        schema:
+          enum:
+          - caption
+          - subtitle
+          example: "{{attachmentType}}"
+          type: string
+        style: simple
+      - description: Le locale value of the attachment
+        explode: false
+        in: path
+        name: locale
+        required: true
+        schema:
+          example: "{{locale}}"
+          pattern: "^[a-z]{2}-[A-Z]{2}$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Attachement file
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Get attachement file
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/attachments/{attachmentType}/{locale}/file"
+        responses:
+          default:
+            statusCode: "200"
+            description: Attachement file
+            content:
+              text/plain:
+                schema:
+                  type: string
+              text/vtt:
+                schema:
+                  type: string
+              application/ttml:
+                schema:
+                  type: string
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.path.attachmentType: method.request.path.attachmentType
+          integration.request.path.locale: method.request.path.locale
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+  /data/videos/usage:
+    get:
+      description: |-
+        Return the monthly usage of the platform ressources.
+        For current month, usage is calculated until current time.
+      operationId: getDataVideoUsage
+      parameters:
+      - description: Number of elements to return (default=10)
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      - description: offset for pagination
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataVideoUsageList'
+          description: List of monthly usage KPIs
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: List Video Usage KPIs
+      tags:
+      - Data
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/data/videos/usage"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+  /webhooks:
+    get:
+      description: |-
+        Return the list of webhooks.
+
+        Return an empty list it there are no webhook to return.
+      parameters:
+      - description: Number of elements to return (default=10)
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      - description: offset for pagination
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookList'
+          description: List of webhooks
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: List webhooks
+      tags:
+      - Webhooks
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/webhooks"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    post:
+      description: |-
+        Create a new webhook to configure notification.
+
+        Only one hook per url
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookProperties'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+          description: Webhook Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Add a new webhook
+      tags:
+      - Webhooks
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: "https://${stageVariables.baseUrl}/webhooks"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: application/json
+      x-accepts: application/json
+  /webhooks/{webhookId}:
+    delete:
+      description: Delete a webhook.
+      operationId: deleteWebhookById
+      parameters:
+      - description: Id of the webhook
+        explode: false
+        in: path
+        name: webhookId
+        required: true
+        schema:
+          example: "{{webhookId}}"
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Webhook Deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Delete a webhook
+      tags:
+      - Webhooks
+      x-amazon-apigateway-integration:
+        httpMethod: DELETE
+        uri: "https://${stageVariables.baseUrl}/webhooks/{webhookId}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.webhookId: method.request.path.webhookId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    get:
+      operationId: getWebhookById
+      parameters:
+      - description: Id of the webhook
+        explode: false
+        in: path
+        name: webhookId
+        required: true
+        schema:
+          example: "{{webhookId}}"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+          description: Requested webhook
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Retun a single webhook
+      tags:
+      - Webhooks
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/webhooks/{webhookId}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.webhookId: method.request.path.webhookId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    put:
+      description: Update a existing webhooks.
+      operationId: updateWebhookById
+      parameters:
+      - description: Id of the webhook
+        explode: false
+        in: path
+        name: webhookId
+        required: true
+        schema:
+          example: "{{webhookId}}"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookProperties'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+          description: Webhook Updated
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Update an existing webhook
+      tags:
+      - Webhooks
+      x-amazon-apigateway-integration:
+        httpMethod: PUT
+        uri: "https://${stageVariables.baseUrl}/webhooks/{webhookId}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.webhookId: method.request.path.webhookId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: application/json
+      x-accepts: application/json
+components:
+  links:
+    getVideoById:
+      description: |
+        The `id` value returned in the response can be used as the `videoId` parameter in `GET /video/{videoId}`.
+      operationId: getVideo
+      parameters:
+        videoId: $response.body#/id
+  parameters:
+    paginationLimit:
+      description: Number of elements to return (default=10)
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        maximum: 1000
+        minimum: 1
+        type: integer
+      style: form
+    paginationOffset:
+      description: offset for pagination
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+      style: form
+    filterSeach:
+      description: Keywords search in all indexed fields
+      explode: true
+      in: query
+      name: search
+      required: false
+      schema:
+        example: "{{search}}"
+        type: string
+      style: form
+    filterSort:
+      description: Sorting results
+      example: "title:desc,ctime:asc"
+      explode: true
+      in: query
+      name: sort
+      required: false
+      schema:
+        type: string
+      style: form
+    filterAttachementType:
+      description: The type of attachments
+      explode: true
+      in: query
+      name: attachmentType
+      required: false
+      schema:
+        enum:
+        - caption
+        - subtitle
+        type: string
+      style: form
+    filterLocale:
+      description: The locale
+      explode: true
+      in: query
+      name: locale
+      required: false
+      schema:
+        pattern: "^[a-z]{2}-[A-Z]{2}$"
+        type: string
+      style: form
+    videoId:
+      description: Id of the video
+      explode: false
+      in: path
+      name: videoId
+      required: true
+      schema:
+        example: "{{videoId}}"
+        type: string
+      style: simple
+    webhookId:
+      description: Id of the webhook
+      explode: false
+      in: path
+      name: webhookId
+      required: true
+      schema:
+        example: "{{webhookId}}"
+        type: string
+      style: simple
+    attachementType:
+      description: Type of attachment
+      explode: false
+      in: path
+      name: attachmentType
+      required: true
+      schema:
+        enum:
+        - caption
+        - subtitle
+        example: "{{attachmentType}}"
+        type: string
+      style: simple
+    locale:
+      description: Le locale value of the attachment
+      explode: false
+      in: path
+      name: locale
+      required: true
+      schema:
+        example: "{{locale}}"
+        pattern: "^[a-z]{2}-[A-Z]{2}$"
+        type: string
+      style: simple
+  responses:
+    InvalidRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The request is invalid or incomplete
+    NotFound:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
+    Unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    ServerError:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Internal Server Error
+  schemas:
+    Pagination:
+      description: Pagination Object
+      properties:
+        offset:
+          example: 30
+          type: integer
+        limit:
+          example: 1
+          type: integer
+        total:
+          example: 355
+          type: integer
+      required:
+      - limit
+      - offset
+      - total
+      type: object
+    Video:
+      allOf:
+      - properties:
+          id:
+            description: id of the video (null when adding a new video)
+            example: STNQM2FIN1Bpa3I3bC9IRw==
+            type: string
+          status:
+            description: "Status of the video :\n* 'REQUESTED': video as been submited,\
+              \ waiting for its creation\n* 'CREATED': video has been created and\
+              \ file can be uploaded         \n* 'TRANSCODING': video is unvailable\
+              \ because still in the creation\n & in encoding process\n* 'AVAILABLE':\
+              \ video is ready to be stream"
+            enum:
+            - REQUESTED
+            - CREATED
+            - TRANSCODING
+            - AVAILABLE
+            example: AVAILABLE
+            type: string
+          duration:
+            description: video duration in second
+            example: 3600
+            type: integer
+          ctime:
+            description: Creation date (timestamp)
+            example: 1677020400
+            type: integer
+          mtime:
+            description: Modification date (timestamp)
+            example: 1679526000
+            type: integer
+          assets:
+            $ref: '#/components/schemas/VideoAssets'
+          metas:
+            additionalProperties: true
+            description: "metas data \nfree-form object: refere to the documentation"
+            type: object
+        required:
+        - id
+        type: object
+      - $ref: '#/components/schemas/VideoProperties'
+      description: Video Object
+    VideoAssets:
+      description: Video Assets Object
+      properties:
+        thumbnail:
+          description: Url of the video thumbnail (cann be empty ?)
+          example: https://media-delivery-cdn.alchimie-services.net/image/v1/mediadb-product-filetype-dev/1002541/COVER.jpg
+          format: uri
+          type: string
+        player:
+          description: Url to the video player code
+          example: https://stream.video-bricks.com/STNQM2FIN1Bpa3I3bC9IRw==/player
+          format: uri
+          type: string
+        stream:
+          description: Url to the video player stream
+          example: https://stream.video-bricks.com/STNQM2FIN1Bpa3I3bC9IRw==
+          format: uri
+          type: string
+        iframe:
+          description: html code to integrate the player in an iframe
+          example: <iframe src="https://player.video-bricks.com/STNQM2FIN1Bpa3I3bC9IRw==/player"
+            gesture="media" allow="encrypted-media" allowfullscreen="allowfullscreen"
+            width="100%"></iframe>
+          type: string
+      type: object
+    VideoProperties:
+      description: Video Properties Object
+      example:
+        public: true
+        description: My video description
+        title: My video title
+        tags:
+        - MyTag
+      properties:
+        title:
+          description: title of the video
+          example: My video title
+          maxLength: 256
+          type: string
+        description:
+          description: description of the video
+          example: My video description
+          maxLength: 2048
+          type: string
+        public:
+          description: |-
+            Define if the video is public (it can be accessible by anybody with the video url).
+            Default = tue
+          example: true
+          maxLength: 2048
+          type: boolean
+        tags:
+          description: tags list linked to video
+          example:
+          - MyTag
+          items:
+            type: string
+          type: array
+      type: object
+    VideoList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/Video'
+            type: array
+        type: object
+      description: Video Object list
+    File:
+      description: File Object
+      properties:
+        file:
+          description: The file to upload
+          format: binary
+          type: string
+      type: object
+    VideoUploadInitResponse:
+      description: Video Single Upload Init response object
+      example:
+        signedUrl: https://alchimie-vpaas-client-uploads.s3.amazonaws.com/ABkWl5kVPykAMSyu/toto?uploadId=5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-&partNumber=1&AWSAccessKeyId=XXXXXXXXXXX&Signature=8mCPTseHxpgP73GT0p7ADyWcwmM%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEG4aCWV1LXdlc3QtMSJGMEQCIEiVvECtKd5v3fq5irCP7lL7OYF5TJgRopk4CzLooWGQAiBkTzXTxwjLQBEqjG%2FoNmVEOvVRZE0N059PR4OLhe9FoSrEAwin%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDQ4OTE0MzIzNDE5OSIMlmuGOIiRddNi%2FwP5KpgDxldMYVS3L%2BAG%2Bl0glvUlqzSwaWuhSJQeYFvDHSF7mMcy%2B8wXzg7GH8B6DkAjQtDITWpdmIBTbpKK7WcDCLfxOobixWz9CkKyBsHuKvbxC0WdoKRpg6UgTA7ZrB9flETvHGgqaYbE%2FJxIzCPy3x79E2y1egpLOwHMGwxg4TBC7OrqIuJjR9v7x%2FYoUTU54%2F7x1VZYHUfhv5rxiE9Pmy91klwYYY2Ht8OIUnDDtWWZoSAvyVXxtSXGsu0yI9HfP9rMtK6DbNX3sNlws97rPQkuBh97gFfr%2Fh39SVKTwGEbz4vqD9DFVPMzJj0%2BBfbWUzMrUzWU1%2FUXskxR4SCTEWuCEiv%2FvAQWAYbCW4ItXnnePh3gTQPXAikwkqSgYOGfWsSpYYkzegvkAuzA03ej9H4Ud6lV0y8Rh8ujB%2F8uwlMsG1DFJnoDMfkNv5WK5zws6rzVJ90PA5j%2BwI7bGA5ejO1cPjC1dp1H5UmYFDDzE2ZxPmd%2BJkTrVnpon4jMkwBkIWZoSQ7gRFfuraiiTJ8jWpTW4MemXHe5kDRaMP%2Bg3aMGOp8BVkQUKhbtZKskDCy1cis%2BXH30kmpjThcQdXcgS6aV5PUQsLx2wn%2BNl66m2zZGZMfh5PCMB0AYs3eXFVgJVGd5sCsP4u20JHKBBfQYAPidGpAIDL2NWrR71pr4vFR0vB32TB4wWzCjM%2BmVgub6Je17mMi19KZCLAtrhyKpxi1ajjG8TGxaNxERrG0LWasiddcuMiEe7QbXjxQvnhg7Jg6d&Expires=1685541291
+      properties:
+        signedUrl:
+          description: signed url
+          example: https://alchimie-vpaas-client-uploads.s3.amazonaws.com/ABkWl5kVPykAMSyu/toto?uploadId=5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-&partNumber=1&AWSAccessKeyId=XXXXXXXXXXX&Signature=8mCPTseHxpgP73GT0p7ADyWcwmM%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEG4aCWV1LXdlc3QtMSJGMEQCIEiVvECtKd5v3fq5irCP7lL7OYF5TJgRopk4CzLooWGQAiBkTzXTxwjLQBEqjG%2FoNmVEOvVRZE0N059PR4OLhe9FoSrEAwin%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDQ4OTE0MzIzNDE5OSIMlmuGOIiRddNi%2FwP5KpgDxldMYVS3L%2BAG%2Bl0glvUlqzSwaWuhSJQeYFvDHSF7mMcy%2B8wXzg7GH8B6DkAjQtDITWpdmIBTbpKK7WcDCLfxOobixWz9CkKyBsHuKvbxC0WdoKRpg6UgTA7ZrB9flETvHGgqaYbE%2FJxIzCPy3x79E2y1egpLOwHMGwxg4TBC7OrqIuJjR9v7x%2FYoUTU54%2F7x1VZYHUfhv5rxiE9Pmy91klwYYY2Ht8OIUnDDtWWZoSAvyVXxtSXGsu0yI9HfP9rMtK6DbNX3sNlws97rPQkuBh97gFfr%2Fh39SVKTwGEbz4vqD9DFVPMzJj0%2BBfbWUzMrUzWU1%2FUXskxR4SCTEWuCEiv%2FvAQWAYbCW4ItXnnePh3gTQPXAikwkqSgYOGfWsSpYYkzegvkAuzA03ej9H4Ud6lV0y8Rh8ujB%2F8uwlMsG1DFJnoDMfkNv5WK5zws6rzVJ90PA5j%2BwI7bGA5ejO1cPjC1dp1H5UmYFDDzE2ZxPmd%2BJkTrVnpon4jMkwBkIWZoSQ7gRFfuraiiTJ8jWpTW4MemXHe5kDRaMP%2Bg3aMGOp8BVkQUKhbtZKskDCy1cis%2BXH30kmpjThcQdXcgS6aV5PUQsLx2wn%2BNl66m2zZGZMfh5PCMB0AYs3eXFVgJVGd5sCsP4u20JHKBBfQYAPidGpAIDL2NWrR71pr4vFR0vB32TB4wWzCjM%2BmVgub6Je17mMi19KZCLAtrhyKpxi1ajjG8TGxaNxERrG0LWasiddcuMiEe7QbXjxQvnhg7Jg6d&Expires=1685541291
+          format: uri
+          type: string
+      type: object
+    VideoMultipartUploadInit:
+      description: Video Mutlipart Upload Init
+      example:
+        size: 1000000
+        name: myvideo.mov
+      properties:
+        name:
+          description: file name
+          example: myvideo.mov
+          type: string
+        size:
+          description: file size (in bits)
+          example: 1000000
+          type: integer
+      required:
+      - name
+      - size
+      type: object
+    VideoMultipartUploadInitResponse:
+      description: Video Mutlipart Upload Init response object
+      example:
+        chunkSize: 1000000
+        parts:
+        - PartNumber: 1
+          signedUrl: https://alchimie-vpaas-client-uploads.s3.amazonaws.com/ABkWl5kVPykAMSyu/toto?uploadId=5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-&partNumber=1&AWSAccessKeyId=XXXXXXXXXXX&Signature=8mCPTseHxpgP73GT0p7ADyWcwmM%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEG4aCWV1LXdlc3QtMSJGMEQCIEiVvECtKd5v3fq5irCP7lL7OYF5TJgRopk4CzLooWGQAiBkTzXTxwjLQBEqjG%2FoNmVEOvVRZE0N059PR4OLhe9FoSrEAwin%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDQ4OTE0MzIzNDE5OSIMlmuGOIiRddNi%2FwP5KpgDxldMYVS3L%2BAG%2Bl0glvUlqzSwaWuhSJQeYFvDHSF7mMcy%2B8wXzg7GH8B6DkAjQtDITWpdmIBTbpKK7WcDCLfxOobixWz9CkKyBsHuKvbxC0WdoKRpg6UgTA7ZrB9flETvHGgqaYbE%2FJxIzCPy3x79E2y1egpLOwHMGwxg4TBC7OrqIuJjR9v7x%2FYoUTU54%2F7x1VZYHUfhv5rxiE9Pmy91klwYYY2Ht8OIUnDDtWWZoSAvyVXxtSXGsu0yI9HfP9rMtK6DbNX3sNlws97rPQkuBh97gFfr%2Fh39SVKTwGEbz4vqD9DFVPMzJj0%2BBfbWUzMrUzWU1%2FUXskxR4SCTEWuCEiv%2FvAQWAYbCW4ItXnnePh3gTQPXAikwkqSgYOGfWsSpYYkzegvkAuzA03ej9H4Ud6lV0y8Rh8ujB%2F8uwlMsG1DFJnoDMfkNv5WK5zws6rzVJ90PA5j%2BwI7bGA5ejO1cPjC1dp1H5UmYFDDzE2ZxPmd%2BJkTrVnpon4jMkwBkIWZoSQ7gRFfuraiiTJ8jWpTW4MemXHe5kDRaMP%2Bg3aMGOp8BVkQUKhbtZKskDCy1cis%2BXH30kmpjThcQdXcgS6aV5PUQsLx2wn%2BNl66m2zZGZMfh5PCMB0AYs3eXFVgJVGd5sCsP4u20JHKBBfQYAPidGpAIDL2NWrR71pr4vFR0vB32TB4wWzCjM%2BmVgub6Je17mMi19KZCLAtrhyKpxi1ajjG8TGxaNxERrG0LWasiddcuMiEe7QbXjxQvnhg7Jg6d&Expires=1685541291
+        - PartNumber: 1
+          signedUrl: https://alchimie-vpaas-client-uploads.s3.amazonaws.com/ABkWl5kVPykAMSyu/toto?uploadId=5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-&partNumber=1&AWSAccessKeyId=XXXXXXXXXXX&Signature=8mCPTseHxpgP73GT0p7ADyWcwmM%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEG4aCWV1LXdlc3QtMSJGMEQCIEiVvECtKd5v3fq5irCP7lL7OYF5TJgRopk4CzLooWGQAiBkTzXTxwjLQBEqjG%2FoNmVEOvVRZE0N059PR4OLhe9FoSrEAwin%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDQ4OTE0MzIzNDE5OSIMlmuGOIiRddNi%2FwP5KpgDxldMYVS3L%2BAG%2Bl0glvUlqzSwaWuhSJQeYFvDHSF7mMcy%2B8wXzg7GH8B6DkAjQtDITWpdmIBTbpKK7WcDCLfxOobixWz9CkKyBsHuKvbxC0WdoKRpg6UgTA7ZrB9flETvHGgqaYbE%2FJxIzCPy3x79E2y1egpLOwHMGwxg4TBC7OrqIuJjR9v7x%2FYoUTU54%2F7x1VZYHUfhv5rxiE9Pmy91klwYYY2Ht8OIUnDDtWWZoSAvyVXxtSXGsu0yI9HfP9rMtK6DbNX3sNlws97rPQkuBh97gFfr%2Fh39SVKTwGEbz4vqD9DFVPMzJj0%2BBfbWUzMrUzWU1%2FUXskxR4SCTEWuCEiv%2FvAQWAYbCW4ItXnnePh3gTQPXAikwkqSgYOGfWsSpYYkzegvkAuzA03ej9H4Ud6lV0y8Rh8ujB%2F8uwlMsG1DFJnoDMfkNv5WK5zws6rzVJ90PA5j%2BwI7bGA5ejO1cPjC1dp1H5UmYFDDzE2ZxPmd%2BJkTrVnpon4jMkwBkIWZoSQ7gRFfuraiiTJ8jWpTW4MemXHe5kDRaMP%2Bg3aMGOp8BVkQUKhbtZKskDCy1cis%2BXH30kmpjThcQdXcgS6aV5PUQsLx2wn%2BNl66m2zZGZMfh5PCMB0AYs3eXFVgJVGd5sCsP4u20JHKBBfQYAPidGpAIDL2NWrR71pr4vFR0vB32TB4wWzCjM%2BmVgub6Je17mMi19KZCLAtrhyKpxi1ajjG8TGxaNxERrG0LWasiddcuMiEe7QbXjxQvnhg7Jg6d&Expires=1685541291
+        fileKey: ABkWl5kVPykAMSyu/myvideo.mov
+        fileId: 5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-
+      properties:
+        chunkSize:
+          description: part chunk size
+          example: 1000000
+          type: integer
+        fileId:
+          description: file id
+          example: 5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-
+          type: string
+        fileKey:
+          description: file key
+          example: ABkWl5kVPykAMSyu/myvideo.mov
+          type: string
+        parts:
+          items:
+            $ref: '#/components/schemas/VideoMultipartUploadInitResponse_parts_inner'
+          type: array
+      type: object
+    VideoMultipartUploadFinalize:
+      description: Video Multipart upload finalization
+      example:
+        parts:
+        - PartNumber: 1
+          ETag: c30a42eb53926797181859fd42ef31fb
+        - PartNumber: 1
+          ETag: c30a42eb53926797181859fd42ef31fb
+        fileKey: ABkWl5kVPykAMSyu/myvideo.mov
+        fileId: 5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-
+      properties:
+        fileId:
+          description: file id
+          example: 5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-
+          type: string
+        fileKey:
+          description: file key
+          example: ABkWl5kVPykAMSyu/myvideo.mov
+          type: string
+        parts:
+          items:
+            $ref: '#/components/schemas/VideoMultipartUploadFinalize_parts_inner'
+          type: array
+      required:
+      - fileId
+      - fileKey
+      - parts
+      type: object
+    VideoAttachment:
+      allOf:
+      - properties:
+          videoId:
+            description: id of the video
+            example: STNQM2FIN1Bpa3I3bC9IRw==
+            type: string
+          attachmentType:
+            default: caption
+            description: Attachment type
+            enum:
+            - caption
+            - subtitle
+            example: caption
+            type: string
+          name:
+            description: the name of file
+            example: caption.srt
+            type: string
+          url:
+            description: the path of the content
+            example: /videos/STNQM2FIN1Bpa3I3bC9IRw==/attachment/caption/en-GB
+            type: string
+          locale:
+            description: the local of attachment
+            example: en-GB
+            type: string
+        required:
+        - videoId
+        type: object
+      description: Video Attachment Object
+    VideoAttachmentList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/VideoAttachment'
+            type: array
+        type: object
+      description: Video Attachment Object list
+    DataVideoUsage:
+      description: Video Usage KPIs
+      properties:
+        monthId:
+          description: month of the kpis
+          example: 2023-02
+          type: string
+        transcoding:
+          description: total of transcoding second since the begining of the month
+          example: 15715.23
+          type: number
+        hosting:
+          description: total of hosting second since the begining of the month
+          example: 171523.34
+          type: number
+        delivery:
+          description: total of delivery (stream) second since the begining of the
+            month
+          example: 171523.34
+          type: number
+        drm:
+          description: total of delivery (stream) second since the begining of the
+            month
+          example: 171523.34
+          type: number
+      required:
+      - env
+      - hosting
+      - monthId
+      - transcoding
+      type: object
+    DataVideoUsageList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/DataVideoUsage'
+            type: array
+        type: object
+      description: Data Video Usage Object list
+    Webhook:
+      allOf:
+      - properties:
+          id:
+            description: id of the webhook
+            example: 01GVZHMKS5B8SKEHSHRD0QHKYF
+            type: string
+          ctime:
+            description: Creation date (timestamp)
+            example: 1677020400
+            type: integer
+          mtime:
+            description: Modification date (timestamp)
+            example: 1679526000
+            type: integer
+        required:
+        - id
+        type: object
+      - $ref: '#/components/schemas/WebhookProperties'
+      description: Webhook Object
+    WebhookProperties:
+      description: Webhook properties object
+      example:
+        eventType:
+        - VIDEO_STATUS
+        - VIDEO_TRANSCODING_PROGRESS
+        url: https://myapplication.com/notification
+        token: 9981f9f4-657a-4ebf-be7c-19bedd4775
+      properties:
+        url:
+          description: Url of the application wich is receiving Notifications
+          example: https://myapplication.com/notification
+          format: uri
+          maxLength: 2048
+          type: string
+        token:
+          description: Optionnal Secret token to validate notifications. Sent with
+            the request in the X-Vpass-Token HTTP header.
+          example: 9981f9f4-657a-4ebf-be7c-19bedd4775
+          maxLength: 256
+          type: string
+        eventType:
+          description: |-
+            List of event to be notified:
+              * VIDEO_STATUS: Get Video object status modification notifications
+              Status values: REQUESTED, CREATED, TRANSCODING, AVAILABLE, DELETED
+              * VIDEO_TRANSCODING_PROGRESS: Get transcoding progression notifications
+          example:
+          - VIDEO_STATUS
+          - VIDEO_TRANSCODING_PROGRESS
+          items:
+            enum:
+            - VIDEO_STATUS
+            - VIDEO_TRANSCODING_PROGRESS
+            type: string
+          type: array
+          uniqueItems: true
+      required:
+      - eventType
+      - url
+      type: object
+    WebhookList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/Webhook'
+            type: array
+        type: object
+      description: Webhook Object List
+    Error:
+      description: Error Object
+      properties:
+        code:
+          description: Code providing details on the error
+          example: 5
+          type: integer
+        message:
+          description: Human readable details on the error
+          example: Error number 5
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    VideoMultipartUploadInitResponse_parts_inner:
+      description: part signed url object
+      example:
+        PartNumber: 1
+        signedUrl: https://alchimie-vpaas-client-uploads.s3.amazonaws.com/ABkWl5kVPykAMSyu/toto?uploadId=5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-&partNumber=1&AWSAccessKeyId=XXXXXXXXXXX&Signature=8mCPTseHxpgP73GT0p7ADyWcwmM%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEG4aCWV1LXdlc3QtMSJGMEQCIEiVvECtKd5v3fq5irCP7lL7OYF5TJgRopk4CzLooWGQAiBkTzXTxwjLQBEqjG%2FoNmVEOvVRZE0N059PR4OLhe9FoSrEAwin%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDQ4OTE0MzIzNDE5OSIMlmuGOIiRddNi%2FwP5KpgDxldMYVS3L%2BAG%2Bl0glvUlqzSwaWuhSJQeYFvDHSF7mMcy%2B8wXzg7GH8B6DkAjQtDITWpdmIBTbpKK7WcDCLfxOobixWz9CkKyBsHuKvbxC0WdoKRpg6UgTA7ZrB9flETvHGgqaYbE%2FJxIzCPy3x79E2y1egpLOwHMGwxg4TBC7OrqIuJjR9v7x%2FYoUTU54%2F7x1VZYHUfhv5rxiE9Pmy91klwYYY2Ht8OIUnDDtWWZoSAvyVXxtSXGsu0yI9HfP9rMtK6DbNX3sNlws97rPQkuBh97gFfr%2Fh39SVKTwGEbz4vqD9DFVPMzJj0%2BBfbWUzMrUzWU1%2FUXskxR4SCTEWuCEiv%2FvAQWAYbCW4ItXnnePh3gTQPXAikwkqSgYOGfWsSpYYkzegvkAuzA03ej9H4Ud6lV0y8Rh8ujB%2F8uwlMsG1DFJnoDMfkNv5WK5zws6rzVJ90PA5j%2BwI7bGA5ejO1cPjC1dp1H5UmYFDDzE2ZxPmd%2BJkTrVnpon4jMkwBkIWZoSQ7gRFfuraiiTJ8jWpTW4MemXHe5kDRaMP%2Bg3aMGOp8BVkQUKhbtZKskDCy1cis%2BXH30kmpjThcQdXcgS6aV5PUQsLx2wn%2BNl66m2zZGZMfh5PCMB0AYs3eXFVgJVGd5sCsP4u20JHKBBfQYAPidGpAIDL2NWrR71pr4vFR0vB32TB4wWzCjM%2BmVgub6Je17mMi19KZCLAtrhyKpxi1ajjG8TGxaNxERrG0LWasiddcuMiEe7QbXjxQvnhg7Jg6d&Expires=1685541291
+      properties:
+        signedUrl:
+          description: part signed url
+          example: https://alchimie-vpaas-client-uploads.s3.amazonaws.com/ABkWl5kVPykAMSyu/toto?uploadId=5Fu8SetDoWjk3wwReTuWzLat6KubZECxfek863H9nsYreaEaKUmQ4G5iyEAETMK9X_DYJ8QBsgnEoM5bM8B.HQBe9eBtpSxLuXM.THMzKy1JBd0b5XGZ7OT6z.RfZAafc4B4PJ.KyQFarsAY4X7j_Eq2bz6ydqfQHdPyE73vl0Q-&partNumber=1&AWSAccessKeyId=XXXXXXXXXXX&Signature=8mCPTseHxpgP73GT0p7ADyWcwmM%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEG4aCWV1LXdlc3QtMSJGMEQCIEiVvECtKd5v3fq5irCP7lL7OYF5TJgRopk4CzLooWGQAiBkTzXTxwjLQBEqjG%2FoNmVEOvVRZE0N059PR4OLhe9FoSrEAwin%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDQ4OTE0MzIzNDE5OSIMlmuGOIiRddNi%2FwP5KpgDxldMYVS3L%2BAG%2Bl0glvUlqzSwaWuhSJQeYFvDHSF7mMcy%2B8wXzg7GH8B6DkAjQtDITWpdmIBTbpKK7WcDCLfxOobixWz9CkKyBsHuKvbxC0WdoKRpg6UgTA7ZrB9flETvHGgqaYbE%2FJxIzCPy3x79E2y1egpLOwHMGwxg4TBC7OrqIuJjR9v7x%2FYoUTU54%2F7x1VZYHUfhv5rxiE9Pmy91klwYYY2Ht8OIUnDDtWWZoSAvyVXxtSXGsu0yI9HfP9rMtK6DbNX3sNlws97rPQkuBh97gFfr%2Fh39SVKTwGEbz4vqD9DFVPMzJj0%2BBfbWUzMrUzWU1%2FUXskxR4SCTEWuCEiv%2FvAQWAYbCW4ItXnnePh3gTQPXAikwkqSgYOGfWsSpYYkzegvkAuzA03ej9H4Ud6lV0y8Rh8ujB%2F8uwlMsG1DFJnoDMfkNv5WK5zws6rzVJ90PA5j%2BwI7bGA5ejO1cPjC1dp1H5UmYFDDzE2ZxPmd%2BJkTrVnpon4jMkwBkIWZoSQ7gRFfuraiiTJ8jWpTW4MemXHe5kDRaMP%2Bg3aMGOp8BVkQUKhbtZKskDCy1cis%2BXH30kmpjThcQdXcgS6aV5PUQsLx2wn%2BNl66m2zZGZMfh5PCMB0AYs3eXFVgJVGd5sCsP4u20JHKBBfQYAPidGpAIDL2NWrR71pr4vFR0vB32TB4wWzCjM%2BmVgub6Je17mMi19KZCLAtrhyKpxi1ajjG8TGxaNxERrG0LWasiddcuMiEe7QbXjxQvnhg7Jg6d&Expires=1685541291
+          format: uri
+          type: string
+        PartNumber:
+          description: part number
+          example: 1
+          type: integer
+      type: object
+    VideoMultipartUploadFinalize_parts_inner:
+      description: part signed url object
+      example:
+        PartNumber: 1
+        ETag: c30a42eb53926797181859fd42ef31fb
+      properties:
+        PartNumber:
+          description: part number
+          example: 1
+          type: integer
+        ETag:
+          description: part Etag
+          example: c30a42eb53926797181859fd42ef31fb
+          type: string
+      type: object
+  securitySchemes:
+    api_key:
+      in: header
+      name: x-api-key
+      type: apiKey
+x-amazon-apigateway-binary-media-types:
+- multipart/form-data
+
