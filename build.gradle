@@ -3,8 +3,8 @@ apply plugin: 'eclipse'
 apply plugin: 'java'
 apply plugin: 'com.diffplug.spotless'
 
-group = 'org.openapitools'
-version = '1.1'
+group = 'com.42videobricks'
+version = '1.1.1'
 
 buildscript {
     repositories {
@@ -89,7 +89,7 @@ if(hasProperty('target') && target == 'android') {
     publishing {
         publications {
             maven(MavenPublication) {
-               artifactId = 'openapi-java-client'
+               artifactId = '42videobricks-java-client'
                from components.java
             }
         }

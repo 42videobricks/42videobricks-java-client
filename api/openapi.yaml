@@ -6,15 +6,17 @@ info:
 servers:
 - description: Sandbox server (videos are watermarked and deleted after 24h)
   url: https://api-sbx.42videobricks.com
-- description: Staging server
-  url: https://api-stg.42videobricks.com
 - description: Production server
   url: https://api.42videobricks.com
+- description: Staging server
+  url: https://api-stg.42videobricks.com
 security:
 - api_key: []
 tags:
 - description: Video Management
   name: Videos
+- description: Get tags
+  name: Tags
 - description: Get data and kpis
   name: Data
 - description: Configure Notifications
@@ -22,9 +24,10 @@ tags:
 paths:
   /videos:
     get:
-      description: "Return the list of videos.\n\nOptionnal: Title is used to filter\
-        \ video: only video containing \nthis string ware returned.\n\nReturn an empty\
-        \ list it there is no video to return."
+      description: |-
+        Return the list of videos.
+
+        Return an empty list it there is no video to return.
       operationId: getVideos
       parameters:
       - description: Number of elements to return (default=10)
@@ -917,9 +920,8 @@ paths:
       description: |-
         Upload an attachement file and attached it to a video
         Currently:
-        - attachement file type is limited to "subtitle" and "cpation" (close caption)
-        - supported file types: SRT (text/plain), SCC (text/plain),
-        TTML (application/ttml), VTT (text/vtt)
+        - attachement file type is limited to "subtitle" and "caption" (close caption)
+        - supported file types: SRT (text/plain), VTT (text/vtt)
       operationId: addAttachmentByVideoId
       parameters:
       - description: Id of the video
@@ -958,8 +960,7 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/File'
-        description: "Attachement file to upload: SRT (text/plain), SCC (text/plain),TTML\
-          \ (application/ttml), VTT (text/vtt)"
+        description: "Attachement file to upload: SRT (text/plain), VTT (text/vtt)"
         required: true
       responses:
         "202":
@@ -1074,16 +1075,76 @@ paths:
               text/plain:
                 schema:
                   type: string
-              text/vtt:
-                schema:
-                  type: string
-              application/ttml:
-                schema:
-                  type: string
         requestParameters:
           integration.request.path.videoId: method.request.path.videoId
           integration.request.path.attachmentType: method.request.path.attachmentType
           integration.request.path.locale: method.request.path.locale
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+  /tags:
+    get:
+      description: Return the list of tags created and set to videos
+      operationId: getTags
+      parameters:
+      - description: Number of elements to return (default=10)
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      - description: offset for pagination
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: \'partial\' string to filter list
+        explode: true
+        in: query
+        name: partial
+        required: false
+        schema:
+          example: "{{partial}}"
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagList'
+          description: List of video tags
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: List Video Tags
+      tags:
+      - Tags
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/tags"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
           integration.request.header.x-env: stageVariables.xenv
           integration.request.header.x-alc-secret: '''from-aws-apigw'''
         passthroughBehavior: when_no_match
@@ -1154,6 +1215,7 @@ paths:
         Return the list of webhooks.
 
         Return an empty list it there are no webhook to return.
+      operationId: getWebhooks
       parameters:
       - description: Number of elements to return (default=10)
         explode: true
@@ -1212,6 +1274,7 @@ paths:
         Create a new webhook to configure notification.
 
         Only one hook per url
+      operationId: addWebhook
       requestBody:
         content:
           application/json:
@@ -1499,6 +1562,16 @@ components:
         example: "{{videoId}}"
         type: string
       style: simple
+    filterPartial:
+      description: \'partial\' string to filter list
+      explode: true
+      in: query
+      name: partial
+      required: false
+      schema:
+        example: "{{partial}}"
+        type: string
+      style: form
     webhookId:
       description: Id of the webhook
       explode: false
@@ -1823,6 +1896,19 @@ components:
             type: array
         type: object
       description: Video Attachment Object list
+    TagList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - properties:
+          data:
+            example:
+            - alien
+            - cowboy
+            items:
+              type: string
+            type: array
+        type: object
+      description: Tag string list
     DataVideoUsage:
       description: Video Usage KPIs
       properties:

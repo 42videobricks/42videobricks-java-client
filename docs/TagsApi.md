@@ -1,19 +1,19 @@
-# DataApi
+# TagsApi
 
 All URIs are relative to *https://api-sbx.42videobricks.com*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**getDataVideoUsage**](DataApi.md#getDataVideoUsage) | **GET** /data/videos/usage | List Video Usage KPIs |
+| [**getTags**](TagsApi.md#getTags) | **GET** /tags | List Video Tags |
 
 
-<a id="getDataVideoUsage"></a>
-# **getDataVideoUsage**
-> DataVideoUsageList getDataVideoUsage(limit, offset)
+<a id="getTags"></a>
+# **getTags**
+> TagList getTags(limit, offset, partial)
 
-List Video Usage KPIs
+List Video Tags
 
-Return the monthly usage of the platform ressources. For current month, usage is calculated until current time.
+Return the list of tags created and set to videos
 
 ### Example
 ```java
@@ -23,7 +23,7 @@ import com.api42videobricks.client.ApiException;
 import com.api42videobricks.client.Configuration;
 import com.api42videobricks.client.auth.*;
 import com.api42videobricks.client.models.*;
-import com.api42videobricks.client.api.DataApi;
+import com.api42videobricks.client.api.TagsApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -36,14 +36,15 @@ public class Example {
     // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
     //api_key.setApiKeyPrefix("Token");
 
-    DataApi apiInstance = new DataApi(defaultClient);
+    TagsApi apiInstance = new TagsApi(defaultClient);
     Integer limit = 56; // Integer | Number of elements to return (default=10)
     Integer offset = 56; // Integer | offset for pagination
+    String partial = "{{partial}}"; // String | \\'partial\\' string to filter list
     try {
-      DataVideoUsageList result = apiInstance.getDataVideoUsage(limit, offset);
+      TagList result = apiInstance.getTags(limit, offset, partial);
       System.out.println(result);
     } catch (ApiException e) {
-      System.err.println("Exception when calling DataApi#getDataVideoUsage");
+      System.err.println("Exception when calling TagsApi#getTags");
       System.err.println("Status code: " + e.getCode());
       System.err.println("Reason: " + e.getResponseBody());
       System.err.println("Response headers: " + e.getResponseHeaders());
@@ -59,10 +60,11 @@ public class Example {
 |------------- | ------------- | ------------- | -------------|
 | **limit** | **Integer**| Number of elements to return (default&#x3D;10) | [optional] |
 | **offset** | **Integer**| offset for pagination | [optional] |
+| **partial** | **String**| \\&#39;partial\\&#39; string to filter list | [optional] |
 
 ### Return type
 
-[**DataVideoUsageList**](DataVideoUsageList.md)
+[**TagList**](TagList.md)
 
 ### Authorization
 
@@ -76,7 +78,7 @@ public class Example {
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-| **200** | List of monthly usage KPIs |  -  |
+| **200** | List of video tags |  -  |
 | **400** | The request is invalid or incomplete |  -  |
 | **500** | Internal Server Error |  -  |
 

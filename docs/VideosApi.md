@@ -28,17 +28,17 @@ All URIs are relative to *https://api-sbx.42videobricks.com*
 
 Upload an attachement
 
-Upload an attachement file and attached it to a video Currently: - attachement file type is limited to \&quot;subtitle\&quot; and \&quot;cpation\&quot; (close caption) - supported file types: SRT (text/plain), SCC (text/plain), TTML (application/ttml), VTT (text/vtt)
+Upload an attachement file and attached it to a video Currently: - attachement file type is limited to \&quot;subtitle\&quot; and \&quot;caption\&quot; (close caption) - supported file types: SRT (text/plain), VTT (text/vtt)
 
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -110,12 +110,12 @@ Upload an image file and set it as Thumbnail to the video
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -183,12 +183,12 @@ You can create a video object by using this endpoint.  Once the video is created
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -254,12 +254,12 @@ Delete an attachment (and the attached file)
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -327,12 +327,12 @@ Delete a thumbnail
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -396,12 +396,12 @@ Delete a video
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -467,12 +467,12 @@ Once video parts are uploaded, finalize the upload by requesting to transcode th
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -540,12 +540,12 @@ Once video file is uploaded, finalize the upload by requesting to transcode the 
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -611,12 +611,12 @@ Get a video attachement object
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -686,12 +686,12 @@ Get the attachement file Currently only text/plain files are handled.
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -761,12 +761,12 @@ Return a list of attachments to a videos
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -839,12 +839,12 @@ Retun a single video
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -908,17 +908,17 @@ public class Example {
 
 List videos
 
-Return the list of videos.  Optionnal: Title is used to filter video: only video containing  this string ware returned.  Return an empty list it there is no video to return.
+Return the list of videos.  Return an empty list it there is no video to return.
 
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -990,12 +990,12 @@ Get signed urls to upload a big file split in multiparts Once the video is uploa
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -1064,12 +1064,12 @@ Get a single signed url to upload a file Once the video is uploaded, do not forg
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -1136,12 +1136,12 @@ Update video properties  Only properties provided are updated.
 ### Example
 ```java
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.VideosApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
 
 public class Example {
   public static void main(String[] args) {

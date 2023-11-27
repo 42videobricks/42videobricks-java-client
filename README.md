@@ -1,8 +1,8 @@
-# openapi-java-client
+# 42videobricks-java-client
 
 42videobricks
 - API version: 1.1
-  - Build date: 2023-09-29T15:43:30.204314Z[Etc/UTC]
+  - Build date: 2023-10-27T13:34:32.692073Z[Etc/UTC]
 
 42videobricks is a Video Platform As A Service (VPaaS)
 
@@ -38,9 +38,9 @@ Add this dependency to your project's POM:
 
 ```xml
 <dependency>
-  <groupId>org.openapitools</groupId>
-  <artifactId>openapi-java-client</artifactId>
-  <version>1.1</version>
+  <groupId>com.42videobricks</groupId>
+  <artifactId>42videobricks-java-client</artifactId>
+  <version>1.1.1</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -51,12 +51,12 @@ Add this dependency to your project's build file:
 
 ```groovy
   repositories {
-    mavenCentral()     // Needed if the 'openapi-java-client' jar has been published to maven central.
-    mavenLocal()       // Needed if the 'openapi-java-client' jar has been published to the local maven repo.
+    mavenCentral()     // Needed if the '42videobricks-java-client' jar has been published to maven central.
+    mavenLocal()       // Needed if the '42videobricks-java-client' jar has been published to the local maven repo.
   }
 
   dependencies {
-     implementation "org.openapitools:openapi-java-client:1.1"
+     implementation "com.42videobricks:42videobricks-java-client:1.1.1"
   }
 ```
 
@@ -70,7 +70,7 @@ mvn clean package
 
 Then manually install the following JARs:
 
-* `target/openapi-java-client-1.1.jar`
+* `target/42videobricks-java-client-1.1.1.jar`
 * `target/lib/*.jar`
 
 ## Getting Started
@@ -80,12 +80,12 @@ Please follow the [installation](#installation) instruction and execute the foll
 ```java
 
 // Import classes:
-import com.42videobricks.ApiClient;
-import com.42videobricks.ApiException;
-import com.42videobricks.Configuration;
-import com.42videobricks.auth.*;
-import com.42videobricks.models.*;
-import com.42videobricks.api.DataApi;
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.DataApi;
 
 public class Example {
   public static void main(String[] args) {
@@ -99,8 +99,8 @@ public class Example {
     //api_key.setApiKeyPrefix("Token");
 
     DataApi apiInstance = new DataApi(defaultClient);
-    Integer limit = 56; // Integer | Number of elements to return (default=10)
-    Integer offset = 56; // Integer | offset for pagination
+    Integer limit = 10; // Integer | Number of elements to return (default=10)
+    Integer offset = 0; // Integer | offset for pagination
     try {
       DataVideoUsageList result = apiInstance.getDataVideoUsage(limit, offset);
       System.out.println(result);
@@ -123,6 +123,7 @@ All URIs are relative to *https://api-sbx.42videobricks.com*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *DataApi* | [**getDataVideoUsage**](docs/DataApi.md#getDataVideoUsage) | **GET** /data/videos/usage | List Video Usage KPIs
+*TagsApi* | [**getTags**](docs/TagsApi.md#getTags) | **GET** /tags | List Video Tags
 *VideosApi* | [**addAttachmentByVideoId**](docs/VideosApi.md#addAttachmentByVideoId) | **POST** /videos/{videoId}/attachments/{attachmentType}/{locale} | Upload an attachement
 *VideosApi* | [**addThumbnailByVideoId**](docs/VideosApi.md#addThumbnailByVideoId) | **POST** /videos/{videoId}/thumbnail | Upload a thumbnail
 *VideosApi* | [**addVideo**](docs/VideosApi.md#addVideo) | **POST** /videos | Add a new video
@@ -139,11 +140,11 @@ Class | Method | HTTP request | Description
 *VideosApi* | [**initMultipartUploadVideoById**](docs/VideosApi.md#initMultipartUploadVideoById) | **POST** /videos/{videoId}/multipart-upload/init | Multipart upload intialization
 *VideosApi* | [**initUploadVideoById**](docs/VideosApi.md#initUploadVideoById) | **GET** /videos/{videoId}/upload/init | Single file upload intialization
 *VideosApi* | [**updateVideoById**](docs/VideosApi.md#updateVideoById) | **PUT** /videos/{videoId} | Update an existing video
+*WebhooksApi* | [**addWebhook**](docs/WebhooksApi.md#addWebhook) | **POST** /webhooks | Add a new webhook
 *WebhooksApi* | [**deleteWebhookById**](docs/WebhooksApi.md#deleteWebhookById) | **DELETE** /webhooks/{webhookId} | Delete a webhook
 *WebhooksApi* | [**getWebhookById**](docs/WebhooksApi.md#getWebhookById) | **GET** /webhooks/{webhookId} | Retun a single webhook
+*WebhooksApi* | [**getWebhooks**](docs/WebhooksApi.md#getWebhooks) | **GET** /webhooks | List webhooks
 *WebhooksApi* | [**updateWebhookById**](docs/WebhooksApi.md#updateWebhookById) | **PUT** /webhooks/{webhookId} | Update an existing webhook
-*WebhooksApi* | [**webhooksGet**](docs/WebhooksApi.md#webhooksGet) | **GET** /webhooks | List webhooks
-*WebhooksApi* | [**webhooksPost**](docs/WebhooksApi.md#webhooksPost) | **POST** /webhooks | Add a new webhook
 
 
 ## Documentation for Models
@@ -152,6 +153,7 @@ Class | Method | HTTP request | Description
  - [DataVideoUsageList](docs/DataVideoUsageList.md)
  - [Error](docs/Error.md)
  - [Pagination](docs/Pagination.md)
+ - [TagList](docs/TagList.md)
  - [Video](docs/Video.md)
  - [VideoAssets](docs/VideoAssets.md)
  - [VideoAttachment](docs/VideoAttachment.md)
