@@ -1,8 +1,8 @@
 # 42videobricks-java-client
 
 42videobricks
-- API version: 1.1
-  - Build date: 2023-10-27T13:34:32.692073Z[Etc/UTC]
+- API version: 1.2
+  - Build date: 2023-11-28T10:12:12.471947Z[Etc/UTC]
 
 42videobricks is a Video Platform As A Service (VPaaS)
 
@@ -40,7 +40,7 @@ Add this dependency to your project's POM:
 <dependency>
   <groupId>com.42videobricks</groupId>
   <artifactId>42videobricks-java-client</artifactId>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -56,7 +56,7 @@ Add this dependency to your project's build file:
   }
 
   dependencies {
-     implementation "com.42videobricks:42videobricks-java-client:1.1.1"
+     implementation "com.42videobricks:42videobricks-java-client:1.2.0"
   }
 ```
 
@@ -70,7 +70,7 @@ mvn clean package
 
 Then manually install the following JARs:
 
-* `target/42videobricks-java-client-1.1.1.jar`
+* `target/42videobricks-java-client-1.2.0.jar`
 * `target/lib/*.jar`
 
 ## Getting Started
@@ -123,6 +123,11 @@ All URIs are relative to *https://api-sbx.42videobricks.com*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *DataApi* | [**getDataVideoUsage**](docs/DataApi.md#getDataVideoUsage) | **GET** /data/videos/usage | List Video Usage KPIs
+*PlaylistsApi* | [**addPlaylist**](docs/PlaylistsApi.md#addPlaylist) | **POST** /playlists | Add a new playlist
+*PlaylistsApi* | [**deletePlaylistById**](docs/PlaylistsApi.md#deletePlaylistById) | **DELETE** /playlists/{playlistId} | Delete a playlist
+*PlaylistsApi* | [**getPlaylistById**](docs/PlaylistsApi.md#getPlaylistById) | **GET** /playlists/{playlistId} | Retun a single playlist
+*PlaylistsApi* | [**getPlaylists**](docs/PlaylistsApi.md#getPlaylists) | **GET** /playlists | List playlists
+*PlaylistsApi* | [**updatePlaylistById**](docs/PlaylistsApi.md#updatePlaylistById) | **PUT** /playlists/{playlistId} | Update an existing playlist
 *TagsApi* | [**getTags**](docs/TagsApi.md#getTags) | **GET** /tags | List Video Tags
 *VideosApi* | [**addAttachmentByVideoId**](docs/VideosApi.md#addAttachmentByVideoId) | **POST** /videos/{videoId}/attachments/{attachmentType}/{locale} | Upload an attachement
 *VideosApi* | [**addThumbnailByVideoId**](docs/VideosApi.md#addThumbnailByVideoId) | **POST** /videos/{videoId}/thumbnail | Upload a thumbnail
@@ -136,6 +141,7 @@ Class | Method | HTTP request | Description
 *VideosApi* | [**getAttachmentFileByVideoId**](docs/VideosApi.md#getAttachmentFileByVideoId) | **GET** /videos/{videoId}/attachments/{attachmentType}/{locale}/file | Get attachement file
 *VideosApi* | [**getAttachmentsByVideoId**](docs/VideosApi.md#getAttachmentsByVideoId) | **GET** /videos/{videoId}/attachments | List of attachments
 *VideosApi* | [**getVideoById**](docs/VideosApi.md#getVideoById) | **GET** /videos/{videoId} | Retun a single video
+*VideosApi* | [**getVideoStatusById**](docs/VideosApi.md#getVideoStatusById) | **GET** /videos/{videoId}/status | Retun the detailed status of the video
 *VideosApi* | [**getVideos**](docs/VideosApi.md#getVideos) | **GET** /videos | List videos
 *VideosApi* | [**initMultipartUploadVideoById**](docs/VideosApi.md#initMultipartUploadVideoById) | **POST** /videos/{videoId}/multipart-upload/init | Multipart upload intialization
 *VideosApi* | [**initUploadVideoById**](docs/VideosApi.md#initUploadVideoById) | **GET** /videos/{videoId}/upload/init | Single file upload intialization
@@ -153,6 +159,9 @@ Class | Method | HTTP request | Description
  - [DataVideoUsageList](docs/DataVideoUsageList.md)
  - [Error](docs/Error.md)
  - [Pagination](docs/Pagination.md)
+ - [Playlist](docs/Playlist.md)
+ - [PlaylistList](docs/PlaylistList.md)
+ - [PlaylistProperties](docs/PlaylistProperties.md)
  - [TagList](docs/TagList.md)
  - [Video](docs/Video.md)
  - [VideoAssets](docs/VideoAssets.md)
@@ -165,6 +174,7 @@ Class | Method | HTTP request | Description
  - [VideoMultipartUploadInitResponse](docs/VideoMultipartUploadInitResponse.md)
  - [VideoMultipartUploadInitResponsePartsInner](docs/VideoMultipartUploadInitResponsePartsInner.md)
  - [VideoProperties](docs/VideoProperties.md)
+ - [VideoStatus](docs/VideoStatus.md)
  - [VideoUploadInitResponse](docs/VideoUploadInitResponse.md)
  - [Webhook](docs/Webhook.md)
  - [WebhookList](docs/WebhookList.md)

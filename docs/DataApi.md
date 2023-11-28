@@ -9,11 +9,11 @@ All URIs are relative to *https://api-sbx.42videobricks.com*
 
 <a id="getDataVideoUsage"></a>
 # **getDataVideoUsage**
-> DataVideoUsageList getDataVideoUsage(limit, offset)
+> DataVideoUsageList getDataVideoUsage(limit, offset, interval, startDate, endDate)
 
 List Video Usage KPIs
 
-Return the monthly usage of the platform ressources. For current month, usage is calculated until current time.
+Return the usage of the platform ressources.  By default, it returns monthly usage but unit (dayly|week|month) can be defined. For current period, usage is calculated until current time. Start and end dates can be also optionaly defined to filter results.
 
 ### Example
 ```java
@@ -39,8 +39,11 @@ public class Example {
     DataApi apiInstance = new DataApi(defaultClient);
     Integer limit = 56; // Integer | Number of elements to return (default=10)
     Integer offset = 56; // Integer | offset for pagination
+    String interval = "day"; // String | Period unit (day|week|month)
+    String startDate = "{{starDate}}"; // String | Start date for the period
+    String endDate = "{{endDate}}"; // String | End date for the period
     try {
-      DataVideoUsageList result = apiInstance.getDataVideoUsage(limit, offset);
+      DataVideoUsageList result = apiInstance.getDataVideoUsage(limit, offset, interval, startDate, endDate);
       System.out.println(result);
     } catch (ApiException e) {
       System.err.println("Exception when calling DataApi#getDataVideoUsage");
@@ -59,6 +62,9 @@ public class Example {
 |------------- | ------------- | ------------- | -------------|
 | **limit** | **Integer**| Number of elements to return (default&#x3D;10) | [optional] |
 | **offset** | **Integer**| offset for pagination | [optional] |
+| **interval** | **String**| Period unit (day|week|month) | [optional] [enum: day, week, month] |
+| **startDate** | **String**| Start date for the period | [optional] |
+| **endDate** | **String**| End date for the period | [optional] |
 
 ### Return type
 

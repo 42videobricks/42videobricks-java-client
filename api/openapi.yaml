@@ -2,7 +2,7 @@ openapi: 3.0.2
 info:
   description: 42videobricks is a Video Platform As A Service (VPaaS)
   title: 42videobricks
-  version: "1.1"
+  version: "1.2"
 servers:
 - description: Sandbox server (videos are watermarked and deleted after 24h)
   url: https://api-sbx.42videobricks.com
@@ -17,6 +17,8 @@ tags:
   name: Videos
 - description: Get tags
   name: Tags
+- description: Palylist Management
+  name: Playlists
 - description: Get data and kpis
   name: Data
 - description: Configure Notifications
@@ -58,7 +60,7 @@ paths:
           type: string
         style: form
       - description: Sorting results
-        example: "title:desc,ctime:asc"
+        example: ctime:asc
         explode: true
         in: query
         name: sort
@@ -760,6 +762,60 @@ paths:
         passthroughBehavior: when_no_match
         type: http_proxy
       x-accepts: application/json
+  /videos/{videoId}/status:
+    get:
+      operationId: getVideoStatusById
+      parameters:
+      - description: Id of the video
+        explode: false
+        in: path
+        name: videoId
+        required: true
+        schema:
+          example: "{{videoId}}"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoStatus'
+          description: Requested Video
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Retun the detailed status of the video
+      tags:
+      - Videos
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/videos/{videoId}/status"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.videoId: method.request.path.videoId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
   /videos/{videoId}/attachments/{attachmentType}/{locale}:
     delete:
       description: Delete an attachment (and the attached file)
@@ -1150,11 +1206,297 @@ paths:
         passthroughBehavior: when_no_match
         type: http_proxy
       x-accepts: application/json
+  /playlists:
+    get:
+      description: |-
+        Return the list of playlist.
+
+        Return an empty list it there is no playlist to return.
+      operationId: getPlaylists
+      parameters:
+      - description: Number of elements to return (default=10)
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      - description: offset for pagination
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: Keywords search in all indexed fields
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: "{{search}}"
+          type: string
+        style: form
+      - description: Sorting results
+        example: ctime:asc
+        explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistList'
+          description: List of playlists
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: List playlists
+      tags:
+      - Playlists
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/playlists"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    post:
+      description: Create a new playlist.
+      operationId: addPlaylist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistProperties'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Playlist'
+          description: Playlist Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Add a new playlist
+      tags:
+      - Playlists
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        uri: "https://${stageVariables.baseUrl}/playlists"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: application/json
+      x-accepts: application/json
+  /playlists/{playlistId}:
+    delete:
+      description: Delete a playlist.
+      operationId: deletePlaylistById
+      parameters:
+      - description: Id of the playlist
+        explode: false
+        in: path
+        name: playlistId
+        required: true
+        schema:
+          example: "{{playlistId}}"
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Playlist Deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Delete a playlist
+      tags:
+      - Playlists
+      x-amazon-apigateway-integration:
+        httpMethod: DELETE
+        uri: "https://${stageVariables.baseUrl}/playlists/{playlistId}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.playlistId: method.request.path.playlistId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    get:
+      operationId: getPlaylistById
+      parameters:
+      - description: Id of the playlist
+        explode: false
+        in: path
+        name: playlistId
+        required: true
+        schema:
+          example: "{{playlistId}}"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Playlist'
+          description: Requested playlist
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Retun a single playlist
+      tags:
+      - Playlists
+      x-amazon-apigateway-integration:
+        httpMethod: GET
+        uri: "https://${stageVariables.baseUrl}/playlists/{playlistId}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.playlistId: method.request.path.playlistId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-accepts: application/json
+    put:
+      description: Update a existing playlist.
+      operationId: updatePlaylistById
+      parameters:
+      - description: Id of the playlist
+        explode: false
+        in: path
+        name: playlistId
+        required: true
+        schema:
+          example: "{{playlistId}}"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistProperties'
+        required: true
+      responses:
+        "202":
+          description: Video update accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The request is invalid or incomplete
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal Server Error
+      summary: Update an existing playlist
+      tags:
+      - Playlists
+      x-amazon-apigateway-integration:
+        httpMethod: PUT
+        uri: "https://${stageVariables.baseUrl}/playlists/{playlistId}"
+        responses:
+          default:
+            statusCode: "200"
+        requestParameters:
+          integration.request.path.playlistId: method.request.path.playlistId
+          integration.request.header.x-env: stageVariables.xenv
+          integration.request.header.x-alc-secret: '''from-aws-apigw'''
+        passthroughBehavior: when_no_match
+        type: http_proxy
+      x-content-type: application/json
+      x-accepts: application/json
   /data/videos/usage:
     get:
       description: |-
-        Return the monthly usage of the platform ressources.
-        For current month, usage is calculated until current time.
+        Return the usage of the platform ressources.
+
+        By default, it returns monthly usage but unit (dayly|week|month) can be defined.
+        For current period, usage is calculated until current time.
+        Start and end dates can be also optionaly defined to filter results.
       operationId: getDataVideoUsage
       parameters:
       - description: Number of elements to return (default=10)
@@ -1174,6 +1516,37 @@ paths:
         required: false
         schema:
           type: integer
+        style: form
+      - description: Period unit (day|week|month)
+        explode: true
+        in: query
+        name: interval
+        required: false
+        schema:
+          enum:
+          - day
+          - week
+          - month
+          example: "{{interval}}"
+          type: string
+        style: form
+      - description: Start date for the period
+        explode: true
+        in: query
+        name: startDate
+        required: false
+        schema:
+          example: "{{starDate}}"
+          type: string
+        style: form
+      - description: End date for the period
+        explode: true
+        in: query
+        name: endDate
+        required: false
+        schema:
+          example: "{{endDate}}"
+          type: string
         style: form
       responses:
         "200":
@@ -1522,7 +1895,7 @@ components:
       style: form
     filterSort:
       description: Sorting results
-      example: "title:desc,ctime:asc"
+      example: ctime:asc
       explode: true
       in: query
       name: sort
@@ -1606,6 +1979,16 @@ components:
         pattern: "^[a-z]{2}-[A-Z]{2}$"
         type: string
       style: simple
+    playlistId:
+      description: Id of the playlist
+      explode: false
+      in: path
+      name: playlistId
+      required: true
+      schema:
+        example: "{{playlistId}}"
+        type: string
+      style: simple
   responses:
     InvalidRequest:
       content:
@@ -1660,12 +2043,14 @@ components:
             description: "Status of the video :\n* 'REQUESTED': video as been submited,\
               \ waiting for its creation\n* 'CREATED': video has been created and\
               \ file can be uploaded         \n* 'TRANSCODING': video is unvailable\
-              \ because still in the creation\n & in encoding process\n* 'AVAILABLE':\
-              \ video is ready to be stream"
+              \ because still in the creation\n & in encoding process\n* 'TRANSCODING_ERROR':\
+              \ video is unvailable because the encoding failed\n * 'AVAILABLE': video\
+              \ is ready to be stream"
             enum:
             - REQUESTED
             - CREATED
             - TRANSCODING
+            - TRANSCODING_ERROR
             - AVAILABLE
             example: AVAILABLE
             type: string
@@ -1734,14 +2119,13 @@ components:
         description:
           description: description of the video
           example: My video description
-          maxLength: 2048
+          maxLength: 500
           type: string
         public:
           description: |-
             Define if the video is public (it can be accessible by anybody with the video url).
             Default = tue
           example: true
-          maxLength: 2048
           type: boolean
         tags:
           description: tags list linked to video
@@ -1896,6 +2280,30 @@ components:
             type: array
         type: object
       description: Video Attachment Object list
+    VideoStatus:
+      description: Video Status Object
+      example:
+        message: message
+        status: REQUESTED
+      properties:
+        status:
+          description: Status of the video
+          enum:
+          - AVAILABLE
+          - CREATED
+          - REQUESTED
+          - TRANSCODING
+          - TRANSCODING_ERROR
+          example: REQUESTED
+          maxLength: 50
+          type: string
+        message:
+          description: "Offer comprehensive elucidation and intricate details to expound\
+            \ upon the occurrence of an encoding error within the video, expounding\
+            \ upon the intricacies and nuances involved in such an exceptional event"
+          maxLength: 256
+          type: string
+      type: object
     TagList:
       allOf:
       - $ref: '#/components/schemas/Pagination'
@@ -1912,9 +2320,14 @@ components:
     DataVideoUsage:
       description: Video Usage KPIs
       properties:
-        monthId:
-          description: month of the kpis
-          example: 2023-02
+        dateKey:
+          description: "Date of the kpis.\n\nFormat: \n- day:YYYY-MM-DD (2023-10-16)\n\
+            - week: YYYY-Www (2023-W42)\n- month: YYYY-MM (2023-10)"
+          example: 2023-10
+          type: string
+        interval:
+          description: Unit of the period (day|month|week)
+          example: month
           type: string
         transcoding:
           description: total of transcoding second since the begining of the month
@@ -1995,7 +2408,7 @@ components:
           description: |-
             List of event to be notified:
               * VIDEO_STATUS: Get Video object status modification notifications
-              Status values: REQUESTED, CREATED, TRANSCODING, AVAILABLE, DELETED
+              Status values: REQUESTED, CREATED, TRANSCODING, TRANSCODING_ERROR, AVAILABLE, DELETED
               * VIDEO_TRANSCODING_PROGRESS: Get transcoding progression notifications
           example:
           - VIDEO_STATUS
@@ -2036,6 +2449,83 @@ components:
       - code
       - message
       type: object
+    Playlist:
+      description: Playlist Object
+      example:
+        children:
+        - null
+        - null
+        name: My playlist name
+        description: My video description
+        ctime: 1677020400
+        id: STNQM2FIN1Bpa3I3bC9IRw==
+        mtime: 1679526000
+      properties:
+        id:
+          description: id of the playlist (null when adding a new video)
+          example: STNQM2FIN1Bpa3I3bC9IRw==
+          type: string
+        name:
+          description: name of the playlist
+          example: My playlist name
+          maxLength: 256
+          type: string
+        description:
+          description: description of the playlist
+          example: My video description
+          maxLength: 2048
+          type: string
+        children:
+          description: ordered list of video in the playlist
+          items:
+            $ref: '#/components/schemas/Video'
+          type: array
+        ctime:
+          description: Creation date (timestamp)
+          example: 1677020400
+          type: integer
+        mtime:
+          description: Modification date (timestamp)
+          example: 1679526000
+          type: integer
+      required:
+      - id
+    PlaylistProperties:
+      description: Video Properties Object
+      example:
+        children:
+        - "{{videoId}}"
+        name: My playlist name
+        description: My playlist description
+      properties:
+        name:
+          description: name of the playlist
+          example: My playlist name
+          maxLength: 256
+          type: string
+        description:
+          description: description of the playlist
+          example: My playlist description
+          maxLength: 2048
+          type: string
+        children:
+          description: ordered list of video Id in the playlist
+          example:
+          - "{{videoId}}"
+          items:
+            type: string
+          type: array
+      type: object
+    PlaylistList:
+      allOf:
+      - $ref: '#/components/schemas/Pagination'
+      - properties:
+          data:
+            items:
+              $ref: '#/components/schemas/Playlist'
+            type: array
+        type: object
+      description: Playlist Object list
     VideoMultipartUploadInitResponse_parts_inner:
       description: part signed url object
       example:

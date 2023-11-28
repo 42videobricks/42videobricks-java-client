@@ -16,6 +16,7 @@ All URIs are relative to *https://api-sbx.42videobricks.com*
 | [**getAttachmentFileByVideoId**](VideosApi.md#getAttachmentFileByVideoId) | **GET** /videos/{videoId}/attachments/{attachmentType}/{locale}/file | Get attachement file |
 | [**getAttachmentsByVideoId**](VideosApi.md#getAttachmentsByVideoId) | **GET** /videos/{videoId}/attachments | List of attachments |
 | [**getVideoById**](VideosApi.md#getVideoById) | **GET** /videos/{videoId} | Retun a single video |
+| [**getVideoStatusById**](VideosApi.md#getVideoStatusById) | **GET** /videos/{videoId}/status | Retun the detailed status of the video |
 | [**getVideos**](VideosApi.md#getVideos) | **GET** /videos | List videos |
 | [**initMultipartUploadVideoById**](VideosApi.md#initMultipartUploadVideoById) | **POST** /videos/{videoId}/multipart-upload/init | Multipart upload intialization |
 | [**initUploadVideoById**](VideosApi.md#initUploadVideoById) | **GET** /videos/{videoId}/upload/init | Single file upload intialization |
@@ -902,6 +903,76 @@ public class Example {
 | **404** | The specified resource was not found |  -  |
 | **500** | Internal Server Error |  -  |
 
+<a id="getVideoStatusById"></a>
+# **getVideoStatusById**
+> VideoStatus getVideoStatusById(videoId)
+
+Retun the detailed status of the video
+
+### Example
+```java
+// Import classes:
+import com.api42videobricks.client.ApiClient;
+import com.api42videobricks.client.ApiException;
+import com.api42videobricks.client.Configuration;
+import com.api42videobricks.client.auth.*;
+import com.api42videobricks.client.models.*;
+import com.api42videobricks.client.api.VideosApi;
+
+public class Example {
+  public static void main(String[] args) {
+    ApiClient defaultClient = Configuration.getDefaultApiClient();
+    defaultClient.setBasePath("https://api-sbx.42videobricks.com");
+    
+    // Configure API key authorization: api_key
+    ApiKeyAuth api_key = (ApiKeyAuth) defaultClient.getAuthentication("api_key");
+    api_key.setApiKey("YOUR API KEY");
+    // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
+    //api_key.setApiKeyPrefix("Token");
+
+    VideosApi apiInstance = new VideosApi(defaultClient);
+    String videoId = "{{videoId}}"; // String | Id of the video
+    try {
+      VideoStatus result = apiInstance.getVideoStatusById(videoId);
+      System.out.println(result);
+    } catch (ApiException e) {
+      System.err.println("Exception when calling VideosApi#getVideoStatusById");
+      System.err.println("Status code: " + e.getCode());
+      System.err.println("Reason: " + e.getResponseBody());
+      System.err.println("Response headers: " + e.getResponseHeaders());
+      e.printStackTrace();
+    }
+  }
+}
+```
+
+### Parameters
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **videoId** | **String**| Id of the video | |
+
+### Return type
+
+[**VideoStatus**](VideoStatus.md)
+
+### Authorization
+
+[api_key](../README.md#api_key)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Requested Video |  -  |
+| **400** | The request is invalid or incomplete |  -  |
+| **404** | The specified resource was not found |  -  |
+| **500** | Internal Server Error |  -  |
+
 <a id="getVideos"></a>
 # **getVideos**
 > VideoList getVideos(limit, offset, search, sort)
@@ -935,7 +1006,7 @@ public class Example {
     Integer limit = 56; // Integer | Number of elements to return (default=10)
     Integer offset = 56; // Integer | offset for pagination
     String search = "{{search}}"; // String | Keywords search in all indexed fields
-    String sort = "title:desc,ctime:asc"; // String | Sorting results
+    String sort = "ctime:asc"; // String | Sorting results
     try {
       VideoList result = apiInstance.getVideos(limit, offset, search, sort);
       System.out.println(result);
